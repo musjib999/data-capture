@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "317210022381",
+    "project_id": "data-capture-ead9e",
+    "storage_bucket": "data-capture-ead9e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317210022381:android:103255e0d24939a3e717e4",
+        "android_client_info": {
+          "package_name": "com.example.data_capture"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBe6-frxDlBofPXB1zrFz19NPXr-0PK2xA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
