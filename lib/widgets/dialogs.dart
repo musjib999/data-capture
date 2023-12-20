@@ -22,3 +22,33 @@ void showSuccessSnackbar(BuildContext context, String message) {
     ),
   );
 }
+
+void showInformationPopUp(BuildContext context,
+    {required String title,
+    required String info,
+    required void Function()? onYes}) {
+  showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(info),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'No',
+                style: TextStyle(color: AppColors.primaryColor),
+              ),
+            ),
+            TextButton(
+              onPressed: onYes,
+              child: const Text(
+                'Yes',
+                style: TextStyle(color: AppColors.primaryColor),
+              ),
+            )
+          ],
+        );
+      });
+}

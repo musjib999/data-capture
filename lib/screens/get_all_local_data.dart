@@ -61,22 +61,31 @@ class _GetAllLocalDataState extends State<GetAllLocalData> {
               itemBuilder: (context, index) {
                 CapturedData data = capturedDataList[index];
                 return ListTile(
-                  onTap: () => Navigator.of(context).push(SingleData.route(capturedData: data)),
+                  onTap: () => Navigator.of(context)
+                      .push(SingleData.route(capturedData: data)),
                   title: Text('Owner: ${data.owner.name}'),
                   subtitle: Text(
                     'House Number: ${data.houseNumber} Street Number: ${data.streetNumber}\nlatitude: ${data.position.latitude}  longitude: ${data.position.longitude}',
                   ),
                   trailing: IconButton(
-                    onPressed: () async {
-                      try {
-                        await _localStorageService
-                            .deleteCapturedData(data.createdAt);
-                        showSuccessSnackbar(
-                            context, 'Record deleted successfully');
-                        setState(() {});
-                      } catch (e) {
-                        showErrorSnackbar(context, e.toString());
-                      }
+                    onPressed: () {
+                      showInformationPopUp(
+                        context,
+                        title: 'Warning',
+                        info: 'Are you sure you want to delete this record?',
+                        onYes: () async {
+                          Navigator.of(context).pop();
+                          try {
+                            await _localStorageService
+                                .deleteCapturedData(data.createdAt);
+                            showSuccessSnackbar(
+                                context, 'Record deleted successfully');
+                            setState(() {});
+                          } catch (e) {
+                            showErrorSnackbar(context, e.toString());
+                          }
+                        },
+                      );
                     },
                     icon: const Icon(
                       Icons.delete,
@@ -92,37 +101,45 @@ class _GetAllLocalDataState extends State<GetAllLocalData> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _loading
             ? null
-            : () async {
-                try {
+            : () {
+                showInformationPopUp(context,
+                    title: 'Warning',
+                    info:
+                        'Are you sure you want to sync all this data? If you do, all the local data will be cleard!!!',
+                    onYes: () async {
+                  Navigator.of(context).pop();
                   setState(() {
                     _loading = true;
                   });
-                  final data = await LocalStorageService().getCapturedData();
-                  if (data.isNotEmpty) {
-                    await DatabaseService().addCapturedDataToFirestore(
-                      data,
-                      user: currentUser,
-                    );
-
+                  try {
+                    final data = await LocalStorageService().getCapturedData();
+                    if (data.isNotEmpty) {
+                      await _localStorageService.saveBackupData(data);
+                      await DatabaseService().addCapturedDataToFirestore(
+                        data,
+                        user: currentUser,
+                      );
+                      setState(() {
+                        _loading = false;
+                      });
+                      LocalStorageService.clearDataField();
+                      showSuccessSnackbar(
+                        context,
+                        'All data synced successfully',
+                      );
+                    } else {
+                      setState(() {
+                        _loading = false;
+                      });
+                      showErrorSnackbar(context, 'No data available to sync');
+                    }
+                  } catch (e) {
+                    showErrorSnackbar(context, e.toString());
                     setState(() {
                       _loading = false;
                     });
-                    LocalStorageService.clearDataField();
-                    Navigator.of(context).pop();
-                    showSuccessSnackbar(
-                        context, 'All data synced successfully');
-                  } else {
-                    setState(() {
-                      _loading = false;
-                    });
-                    showErrorSnackbar(context, 'No data available to sync');
                   }
-                } catch (e) {
-                  showErrorSnackbar(context, e.toString());
-                  setState(() {
-                    _loading = false;
-                  });
-                }
+                });
               },
         label: _loading
             ? const CircularProgressIndicator()
@@ -131,3 +148,36 @@ class _GetAllLocalDataState extends State<GetAllLocalData> {
     );
   }
 }
+
+
+// try {
+//                   setState(() {
+//                     _loading = true;
+//                   });
+//                   final data = await LocalStorageService().getCapturedData();
+//                   if (data.isNotEmpty) {
+//                     await _localStorageService.saveBackupData(data);
+//                     await DatabaseService().addCapturedDataToFirestore(
+//                       data,
+//                       user: currentUser,
+//                     );
+
+//                     setState(() {
+//                       _loading = false;
+//                     });
+//                     LocalStorageService.clearDataField();
+//                     Navigator.of(context).pop();
+//                     showSuccessSnackbar(
+//                         context, 'All data synced successfully');
+//                   } else {
+//                     setState(() {
+//                       _loading = false;
+//                     });
+//                     showErrorSnackbar(context, 'No data available to sync');
+//                   }
+//                 } catch (e) {
+//                   showErrorSnackbar(context, e.toString());
+//                   setState(() {
+//                     _loading = false;
+//                   });
+//                 }

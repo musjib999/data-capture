@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:data_capture/models/captured_data_model.dart';
 import 'package:data_capture/models/user.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
@@ -73,5 +77,36 @@ class LocalStorageService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     await prefs.remove('data');
+  }
+
+  Future<void> saveBackupData(List<CapturedData> jsonList) async {
+    try {
+      Directory? directory = await getExternalStorageDirectory();
+      File file = File('${directory!.path}/backup_data.json');
+
+      final isFileExist = await file.exists();
+      if (isFileExist == false) {
+        List<Map<String, dynamic>> content =
+            jsonList.map((e) => e.toJson()).toList();
+        await file.writeAsString(json.encode(content));
+      } else {
+        final content = await file.readAsString();
+        List<dynamic> existingContent = json.decode(content);
+        print(content);
+        existingContent.addAll(jsonList.map((e) => e.toJson()).toList());
+        final appendedContent =
+            await file.writeAsString(json.encode(existingContent));
+        print(appendedContent.readAsStringSync());
+      }
+    } catch (e, s) {
+      print(s);
+      throw e.toString();
+    }
+//     final directory = await getExternalStorageDirectory();
+// //creates text_file in the provided path.
+//     final file = File('${directory!.path}/backup.json');
+//     var local = await file.writeAsString('Hello this is a test file');
+//     print(local.path);
+//     print(local.readAsStringSync());
   }
 }
