@@ -38,6 +38,15 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
   double longitude = 0.0;
   bool _loading = false;
 
+  String selectedLga = '';
+  String selectedCommunity = '';
+  List<String> communities = [];
+
+  final Map<String, List<String>> communityByLga = {
+    'LGA 1': ['Community 1', 'Community 2', 'Community 3'],
+    'LGA 2': ['Community 4', 'Community 5', 'Community 6'],
+  };
+
   @override
   void dispose() {
     _ownerNameController.dispose();
@@ -122,31 +131,96 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
                   },
                 ),
                 const SizedBox(height: 12),
-                AppInputField(
-                  prefixIcon: Icons.location_city_rounded,
-                  hintText: 'Community Name',
-                  labelText: 'Community Name',
-                  controller: _communityName,
+                DropdownButtonFormField<String>(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Community Name is required';
+                      return 'Please select a LGA';
                     }
                     return null;
                   },
+                  hint: const Text('Select LGA'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedLga = newValue!;
+                      communities = communityByLga[selectedLga] ?? [];
+                      selectedCommunity = '';
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.location_city),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  items: communityByLga.keys
+                      .map<DropdownMenuItem<String>>(
+                        (String lga) => DropdownMenuItem<String>(
+                          value: lga,
+                          child: Text(lga),
+                        ),
+                      )
+                      .toList(),
                 ),
                 const SizedBox(height: 12),
-                AppInputField(
-                  prefixIcon: Icons.location_city_rounded,
-                  hintText: 'LGA',
-                  labelText: 'LGA',
-                  controller: _lga,
+                DropdownButtonFormField<String>(
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'LGA is required';
+                      return 'Please select a Community';
                     }
                     return null;
                   },
+                  hint: const Text('Select Community'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedCommunity = newValue!;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.location_city),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  items: communities
+                      .map<DropdownMenuItem<String>>(
+                        (String community) => DropdownMenuItem<String>(
+                          value: community,
+                          child: Text(community),
+                        ),
+                      )
+                      .toList(),
                 ),
+                // AppInputField(
+                //   prefixIcon: Icons.location_city_rounded,
+                //   hintText: 'Community Name',
+                //   labelText: 'Community Name',
+                //   controller: _communityName,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return 'Community Name is required';
+                //     }
+                //     return null;
+                //   },
+                // ),
+                // const SizedBox(height: 12),
+                // AppInputField(
+                //   prefixIcon: Icons.location_city_rounded,
+                //   hintText: 'LGA',
+                //   labelText: 'LGA',
+                //   controller: _lga,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return 'LGA is required';
+                //     }
+                //     return null;
+                //   },
+                // ),
                 const SizedBox(height: 12),
                 AppInputField(
                   prefixIcon: Icons.attach_money_outlined,

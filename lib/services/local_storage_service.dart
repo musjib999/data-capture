@@ -92,21 +92,11 @@ class LocalStorageService {
       } else {
         final content = await file.readAsString();
         List<dynamic> existingContent = json.decode(content);
-        print(content);
         existingContent.addAll(jsonList.map((e) => e.toJson()).toList());
-        final appendedContent =
-            await file.writeAsString(json.encode(existingContent));
-        print(appendedContent.readAsStringSync());
+        await file.writeAsString(json.encode(existingContent));
       }
-    } catch (e, s) {
-      print(s);
+    } catch (e) {
       throw e.toString();
     }
-//     final directory = await getExternalStorageDirectory();
-// //creates text_file in the provided path.
-//     final file = File('${directory!.path}/backup.json');
-//     var local = await file.writeAsString('Hello this is a test file');
-//     print(local.path);
-//     print(local.readAsStringSync());
   }
 }
