@@ -43,8 +43,28 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
   List<String> communities = [];
 
   final Map<String, List<String>> communityByLga = {
-    'LGA 1': ['Community 1', 'Community 2', 'Community 3'],
-    'LGA 2': ['Community 4', 'Community 5', 'Community 6'],
+    'BIRNIN KUDU': [
+      'RUMBUYA',
+      'BADUNGU',
+      'GUNA\'A DAMAU',
+      'TUDU BABBA',
+      'KADANGARE'
+    ],
+    'JAHUN': [
+      'KANWA',
+      'TINIBU',
+      'MAKANGAWA',
+      'JABARNA',
+      'IDANDUNA',
+      'DAMUTAWA'
+    ],
+    'SULE TANKARKAR': ['ALBASU'],
+    'GURI': ['ABUNABO', 'ZUGOBIYA'],
+    'AUYO': ['GADDIMARI', 'AFARMO'],
+    'BIRNIWA': ['KIRILLA'],
+    'KAFIN HAUSA': ['MAJERIN GABAS'],
+    'RINGIM': ['GILIMA', 'KWARI'],
+    'GARKI': ['KARGO'],
   };
 
   @override
