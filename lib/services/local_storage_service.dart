@@ -99,4 +99,25 @@ class LocalStorageService {
       throw e.toString();
     }
   }
+
+  Future<void> exportData(List<FirestoreData> jsonList) async {
+    try {
+      Directory? directory = await getExternalStorageDirectory();
+      File file = File('${directory!.path}/birnin_kudu.json');
+
+      final isFileExist = await file.exists();
+      if (isFileExist == false) {
+        List<Map<String, dynamic>> content =
+            jsonList.map((e) => e.toJson()).toList();
+        await file.writeAsString(json.encode(content));
+      } else {
+        final content = await file.readAsString();
+        List<dynamic> existingContent = json.decode(content);
+        existingContent.addAll(jsonList.map((e) => e.toJson()).toList());
+        await file.writeAsString(json.encode(existingContent));
+      }
+    } catch (e) {
+      throw e.toString();
+    }
+  }
 }

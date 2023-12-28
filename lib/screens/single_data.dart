@@ -17,7 +17,7 @@ class SingleData extends StatelessWidget {
         title: const Text(' Single Data'),
       ),
       body: ListView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         children: <Widget>[
           _buildListItem('Owner Name', capturedData.owner.name, Icons.person),
           _buildListItem('Owner Phone', capturedData.owner.phone, Icons.phone),
@@ -45,7 +45,7 @@ class SingleData extends StatelessWidget {
       leading: Icon(leadingIcon),
       title: Text(
         title,
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(value),
     );

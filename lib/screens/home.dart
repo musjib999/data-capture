@@ -32,6 +32,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     print('Loading...');
+      //     // await databaseService.updateAllDocumentsLGA('BIRNIN KUDU');
+      //     final allData = await databaseService.getAllSyncedData();
+      //     LocalStorageService().exportData(allData);
+      //     print('Finshed...');
+      //     print(allData.length);
+      //   },
+      //   child: const Text('Press'),
+      // ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: RefreshIndicator(

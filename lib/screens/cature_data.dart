@@ -23,16 +23,16 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final LocalStorageService _localStorageService = LocalStorageService();
 
-  final TextEditingController _ownerNameController = TextEditingController();
-  final TextEditingController _ownerPhoneNumberController =
-      TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
+  final _ownerNameController = TextEditingController();
+  final _ownerPhoneNumberController = TextEditingController();
+  final _addressController = TextEditingController();
   final _houseNumber = TextEditingController();
   final _streetNumber = TextEditingController();
   final _noOfRooms = TextEditingController();
   final _weeklyAmount = TextEditingController();
   final _communityName = TextEditingController();
   final _lga = TextEditingController();
+  final _grains = TextEditingController();
 
   double latitude = 0.0;
   double longitude = 0.0;
@@ -40,7 +40,14 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
 
   String selectedLga = '';
   String selectedCommunity = '';
+  String selectedHouseType = '';
+  String selectedEnergy = '';
+  String selectedTransportMeans = '';
+
   List<String> communities = [];
+  List<String> houseTypes = ['Family', 'Stand alone'];
+  List<String> sourceOfEnergy = ['Generator', 'Solar Kit', 'None'];
+  List<String> meansOfTransport = ['Bicycle', 'Motorcycle', 'Car', 'None'];
 
   final Map<String, List<String>> communityByLga = {
     'BIRNIN KUDU': [
@@ -112,7 +119,7 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
                 ),
                 const SizedBox(height: 12),
                 AppInputField(
-                  prefixIcon: Icons.location_city_rounded,
+                  prefixIcon: Icons.house_outlined,
                   hintText: 'House number',
                   labelText: 'House number',
                   controller: _houseNumber,
@@ -125,7 +132,7 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
                 ),
                 const SizedBox(height: 12),
                 AppInputField(
-                  prefixIcon: Icons.location_city_rounded,
+                  prefixIcon: Icons.location_on_outlined,
                   hintText: 'Street number',
                   labelText: 'Street number',
                   controller: _streetNumber,
@@ -137,8 +144,40 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
                   },
                 ),
                 const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a house type';
+                    }
+                    return null;
+                  },
+                  hint: const Text('Select House Type'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedHouseType = newValue!;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.home_filled),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  items: houseTypes
+                      .map<DropdownMenuItem<String>>(
+                        (String type) => DropdownMenuItem<String>(
+                          value: type,
+                          child: Text(type),
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 12),
                 AppInputField(
-                  prefixIcon: Icons.location_city_rounded,
+                  prefixIcon: Icons.weekend_outlined,
                   hintText: 'Number of rooms',
                   labelText: 'Number of rooms',
                   controller: _noOfRooms,
@@ -216,31 +255,38 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
                       )
                       .toList(),
                 ),
-                // AppInputField(
-                //   prefixIcon: Icons.location_city_rounded,
-                //   hintText: 'Community Name',
-                //   labelText: 'Community Name',
-                //   controller: _communityName,
-                //   validator: (value) {
-                //     if (value == null || value.isEmpty) {
-                //       return 'Community Name is required';
-                //     }
-                //     return null;
-                //   },
-                // ),
-                // const SizedBox(height: 12),
-                // AppInputField(
-                //   prefixIcon: Icons.location_city_rounded,
-                //   hintText: 'LGA',
-                //   labelText: 'LGA',
-                //   controller: _lga,
-                //   validator: (value) {
-                //     if (value == null || value.isEmpty) {
-                //       return 'LGA is required';
-                //     }
-                //     return null;
-                //   },
-                // ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a source of energy';
+                    }
+                    return null;
+                  },
+                  hint: const Text('Select Source of Energy'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedEnergy = newValue!;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.lightbulb_outline),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  items: sourceOfEnergy
+                      .map<DropdownMenuItem<String>>(
+                        (String source) => DropdownMenuItem<String>(
+                          value: source,
+                          child: Text(source),
+                        ),
+                      )
+                      .toList(),
+                ),
                 const SizedBox(height: 12),
                 AppInputField(
                   prefixIcon: Icons.attach_money_outlined,
@@ -251,6 +297,52 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Average amount is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select means of transportation';
+                    }
+                    return null;
+                  },
+                  hint: const Text('Select Means of Transportation'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedTransportMeans = newValue!;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.drive_eta_outlined),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey,
+                        width: 1.0,
+                      ),
+                    ),
+                  ),
+                  items: meansOfTransport
+                      .map<DropdownMenuItem<String>>(
+                        (String source) => DropdownMenuItem<String>(
+                          value: source,
+                          child: Text(source),
+                        ),
+                      )
+                      .toList(),
+                ),
+                const SizedBox(height: 12),
+                AppInputField(
+                  prefixIcon: Icons.grain,
+                  hintText: 'Grains produce per annum',
+                  labelText: 'Grains produce',
+                  controller: _grains,
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Grains produce is required';
                     }
                     return null;
                   },
@@ -328,6 +420,10 @@ class _CaptureDataScreenState extends State<CaptureDataScreen> {
                               communityName: _communityName.text,
                               lga: _lga.text,
                               createdAt: DateTime.now(),
+                              houseType: selectedHouseType,
+                              sourceOfEnergy: selectedEnergy,
+                              grainsPerAnnum: num.parse(_houseNumber.text),
+                              meansOfTransport: selectedTransportMeans,
                             ),
                           );
                           _ownerNameController.clear();

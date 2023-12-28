@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:data_capture/models/captured_data_model.dart';
+import 'package:data_capture/models/position.dart';
 import 'package:data_capture/models/user.dart';
 import 'package:data_capture/services/local_storage_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -60,6 +61,57 @@ class DatabaseService {
       return await LocalStorageService.getUserData();
     } catch (e) {
       throw 'Error occurred while fetching user data: $e';
+    }
+  }
+
+  Future<List<FirestoreData>> getAllSyncedData() async {
+    try {
+      final query = await _firestore.collection('data').get();
+
+      return query.docs
+          .map(
+            (e) => FirestoreData(
+              id: e.id,
+              owner: Owner.fromJson(e.data()['owner']),
+              streetNumber: e.data()["streetNumber"],
+              houseNumber: e.data()["houseNumber"],
+              numberOfRooms: e.data()["numberOfRooms"],
+              weeklyAverageRechargeAmount:
+                  e.data()["weeklyAverageRechargeAmount"].toDouble(),
+              position: Position.fromJson(e.data()["position"]),
+              communityName: e.data()["communityName"],
+              lga: e.data()["lga"],
+              createdAt: DateTime.parse(e.data()["createdAt"]),
+            ),
+          )
+          .toList();
+    } catch (e) {
+      print('Error retrieving documents: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateAllDocumentsLGA(String newValue) async {
+    CollectionReference dataCollection =
+        FirebaseFirestore.instance.collection('data');
+
+    QuerySnapshot querySnapshot = await dataCollection.get();
+
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    for (var doc in querySnapshot.docs) {
+      // Get a reference to each document and update the 'lga' field
+      DocumentReference docRef = dataCollection.doc(doc.id);
+      batch.update(docRef, {'lga': newValue});
+    }
+
+    try {
+      // Commit the batched write operation
+      await batch.commit();
+      print('All documents updated successfully with new LGA value');
+    } catch (e) {
+      print('Error updating documents: $e');
+      throw e;
     }
   }
 
