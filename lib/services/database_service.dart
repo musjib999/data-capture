@@ -13,7 +13,7 @@ class DatabaseService {
   Future<void> saveUserInfo(String name, UserCredential userCredential) async {
     try {
       String userId =
-          userCredential.user!.uid; // Get the user ID from UserCredential
+          userCredential.user!.uid;
 
       await _firestore.collection('users').doc(userId).set({
         'name': name,
@@ -100,13 +100,11 @@ class DatabaseService {
     WriteBatch batch = FirebaseFirestore.instance.batch();
 
     for (var doc in querySnapshot.docs) {
-      // Get a reference to each document and update the 'lga' field
       DocumentReference docRef = dataCollection.doc(doc.id);
       batch.update(docRef, {'lga': newValue});
     }
 
     try {
-      // Commit the batched write operation
       await batch.commit();
       print('All documents updated successfully with new LGA value');
     } catch (e) {
