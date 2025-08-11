@@ -39,10 +39,12 @@ class AppInputField extends StatelessWidget {
         labelText: labelText,
         hintText: hintText,
         errorText: errorText,
+        filled: true,
+        fillColor: Colors.grey[100],
         border: const OutlineInputBorder(
           borderSide: BorderSide(
             color: Colors.grey,
-            width: 1.0,
+            width: 0.5,
           ),
         ),
         prefixIcon: Icon(prefixIcon),
@@ -63,13 +65,13 @@ class AppTextArea extends StatelessWidget {
   final Function(String)? onChanged;
 
   const AppTextArea({
-    Key? key,
+    super.key,
     required this.controller,
     this.hintText = '',
     this.maxLines = 1,
     this.keyboardType = TextInputType.text,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +83,8 @@ class AppTextArea extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hintText,
         border: const OutlineInputBorder(),
+        filled: true,
+        fillColor: Colors.grey[100],
       ),
     );
   }

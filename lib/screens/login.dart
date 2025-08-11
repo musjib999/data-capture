@@ -1,148 +1,257 @@
-// ignore_for_file: use_build_context_synchronously
-
+import 'package:flutter/material.dart';
 import 'package:data_capture/global/global_var.dart';
 import 'package:data_capture/screens/home.dart';
 import 'package:data_capture/screens/register.dart';
 import 'package:data_capture/services/auth_service.dart';
-import 'package:data_capture/themes/text_styles.dart';
 import 'package:data_capture/widgets/dialogs.dart';
-import 'package:data_capture/widgets/primary_raised_button.dart';
-import 'package:flutter/material.dart';
 
-import '../widgets/app_input_field.dart';
+class LoginPage extends StatefulWidget {
+  static Route route({Function()? onSwitchToRegister}) => MaterialPageRoute(
+      builder: (_) => LoginPage(onSwitchToRegister: onSwitchToRegister));
+  final Function()? onSwitchToRegister;
 
-class LoginScreen extends StatefulWidget {
-  static Route route() =>
-      MaterialPageRoute(builder: (_) => const LoginScreen());
-  const LoginScreen({super.key});
+  const LoginPage({super.key, this.onSwitchToRegister});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController email = TextEditingController();
-  TextEditingController pwd = TextEditingController();
+class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final bool _submitted = false;
+  final TextEditingController email = TextEditingController();
+  final TextEditingController pwd = TextEditingController();
   bool _loading = false;
+  String _errorMessage = "";
+
+  Future<void> _handleLogin() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _loading = true;
+        _errorMessage = "";
+      });
+      _formKey.currentState!.save();
+      try {
+        AuthService authService = AuthService();
+        final user = await authService.login(email.text, pwd.text);
+        currentUser = user;
+
+        Navigator.pushReplacement(
+          context,
+          HomeScreen.route(user),
+        );
+      } catch (e) {
+        setState(() {
+          _loading = false;
+          _errorMessage = e.toString();
+        });
+        showErrorSnackbar(context, '$e');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Scaffold(
-      body: SafeArea(
+      backgroundColor: Colors.white,
+      body: Center(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
           child: Form(
             key: _formKey,
-            child: Container(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 60),
-                  const Center(
-                    child: FlutterLogo(
-                      size: 80,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.account_circle, size: 64, color: primaryColor),
+                const SizedBox(height: 12),
+                Text(
+                  "Welcome Back",
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Sign in to your enumerator account",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 24),
+
+                // Email
+                _buildInputField(
+                  icon: Icons.email_outlined,
+                  hint: "Email",
+                  controller: email,
+                  keyboardType: TextInputType.emailAddress,
+                  maxLength: 50,
+                  showCounter: true,
+                  validator: (text) {
+                    if (text!.isEmpty) return 'Email is required';
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(text)) {
+                      return 'Invalid email format';
+                    }
+                    return null;
+                  },
+                ),
+
+                // Password
+                _buildInputField(
+                  icon: Icons.lock_outline,
+                  hint: "Password",
+                  controller: pwd,
+                  keyboardType: TextInputType.visiblePassword,
+                  maxLength: 20,
+                  showCounter: true,
+                  validator: (text) {
+                    if (text!.isEmpty) return 'Password is required';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Error alert
+                if (_errorMessage.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red[50],
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.red),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.red),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _errorMessage,
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 50),
-                  Text(
-                    'Login',
-                    style: AppTextStyle.title,
-                  ),
-                  Text(
-                    'Please login to continue',
-                    style: AppTextStyle.headline,
-                  ),
-                  const SizedBox(height: 30),
-                  AppInputField(
-                    prefixIcon: Icons.email_outlined,
-                    controller: email,
-                    hintText: 'Email',
-                    labelText: 'Enter email',
-                    validator: (text) {
-                      String pattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
-                      RegExp regExp = RegExp(pattern);
-                      if (text!.isEmpty) {
-                        return 'Email is required';
-                      } else if (!regExp.hasMatch(text)) {
-                        return 'Enter a valid email';
-                      }
-                      return null;
-                    },
-                    autovalidateMode: _submitted
-                        ? AutovalidateMode.onUserInteraction
-                        : AutovalidateMode.disabled,
-                  ),
-                  const SizedBox(height: 25.0),
-                  AppInputField(
-                    prefixIcon: Icons.lock_outline,
-                    controller: pwd,
-                    hintText: 'Password',
-                    labelText: 'Enter password',
-                    obscureText: true,
-                    validator: (text) {
-                      if (text!.isEmpty) {
-                        return 'Password is required';
-                      } else if (text.length < 6) {
-                        return 'Password should be at least 6 characters';
-                      }
-                      return null;
-                    },
-                    autovalidateMode: _submitted
-                        ? AutovalidateMode.onUserInteraction
-                        : AutovalidateMode.disabled,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context)
-                            .pushReplacement(Register.route()),
-                        child: const Text('Don\'t have an account? Register'),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 40.0),
-                  AppPrimaryRaisedButton(
-                    onPressed: _loading
-                        ? null
-                        : () async {
-                            if (_formKey.currentState!.validate()) {
-                              setState(() {
-                                _loading = true;
-                              });
-                              _formKey.currentState!.save();
-                              try {
-                                AuthService authService = AuthService();
-                                final user = await authService.login(
-                                    email.text, pwd.text);
-                                currentUser = user;
+                if (_errorMessage.isNotEmpty) const SizedBox(height: 16),
 
-                                Navigator.pushReplacement(
-                                  context,
-                                  HomeScreen.route(user),
-                                );
-                              } catch (e) {
-                                setState(() {
-                                  _loading = false;
-                                });
-                                showErrorSnackbar(context, '$e');
-                              }
-                            }
-                          },
+                // Sign In Button
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: _loading ? null : _handleLogin,
                     child: _loading
-                        ? const CircularProgressIndicator()
-                        : Text(
-                            'Login',
-                            style: AppTextStyle.buttonTitle,
-                          ),
-                  )
-                ],
-              ),
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Text("Signing in..."),
+                            ],
+                          )
+                        : const Text("Sign In"),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Switch to Register
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Don't have an account?"),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(context, Register.route());
+                      },
+                      child: const Text("Sign up"),
+                    )
+                  ],
+                )
+              ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required IconData icon,
+    required String hint,
+    required TextEditingController controller,
+    TextInputType? keyboardType,
+    int? maxLength,
+    bool showCounter = false,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: keyboardType,
+        maxLength: showCounter ? maxLength : null,
+        validator: validator,
+        style: const TextStyle(
+          fontSize: 16,
+          color: Colors.black87,
+        ),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(
+            color: Colors.grey[500],
+            fontSize: 16,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: Colors.grey[600],
+            size: 20,
+          ),
+          suffixText: showCounter && maxLength != null ? '0/$maxLength' : null,
+          suffixStyle: TextStyle(
+            color: Colors.grey[500],
+            fontSize: 12,
+          ),
+          filled: true,
+          fillColor: Colors.grey[100],
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red, width: 1),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
+          ),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          counterText: "", // Hide the default counter
         ),
       ),
     );

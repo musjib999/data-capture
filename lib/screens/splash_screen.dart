@@ -30,10 +30,10 @@ class _SplashScreenState extends State<SplashScreen> {
         currentUser = userData;
         Navigator.pushReplacement(context, HomeScreen.route(userData));
       } else {
-        Navigator.pushReplacement(context, LoginScreen.route());
+        Navigator.pushReplacement(context, LoginPage.route());
       }
     } catch (e) {
-      Navigator.pushReplacement(context, LoginScreen.route());
+      Navigator.pushReplacement(context, LoginPage.route());
       showErrorSnackbar(context, e.toString());
     }
   }
